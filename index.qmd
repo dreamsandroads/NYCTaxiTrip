@@ -1,1 +1,71 @@
 # Introduction
+
+
+## Motivation
+Yellow taxis are a crucial component of the transportation system in New York City (NYC). The decision to delve into the analysis of **NYC Yellow Taxi Trip** data for 2014 is driven by the desire to highlight patterns and trends that may offer valuable insights into the dynamics of yellow taxi usage, fare distribution, and passenger behaviors throughout 2014.
+
+In 2014, across the months, the total number of trips is approximately uniform. Therefore, we focus on **November 2014**, a month with exciting holidays and events in NYC. November 2014 featured several notable holidays and events:
+
+* NYC Marathon (November 2, 2014)
+
+* Veterans Day (November 11, 2014)
+
+* NYC Documentary Film Festival (November 13-20, 2014)
+
+* Thanksgiving Day Parade (November 27, 2014)
+
+This study serves as a gateway to understanding the complexity of NYC transportation patterns, particularly in November 2014. Through this exploration, we aim to highlight various aspects of the NYC yellow taxi system by comparing and contrasting the dynamics of yellow taxi usage, fare distribution, and passenger behaviors on holidays and event days with those on regular days.
+
+
+## Research Question
+1. What is the trend in the number of trips in November 2014 by day?
+* Do weekends/holidays in the chosen month impact the number of trips?
+* What are the most and least busy locations during weekends/holidays compared to other days?
+
+2. NYC Yellow Taxi Fare Amount Trend:
+* What is the overall distribution of taxi fare amount in NYC, and what insights can be gained about the distribution?
+* Is there a relationship between fare amounts and time of the day, trip distance, or trip duration?
+
+3. NYC Yellow Taxi Tipping Trend:
+* How does the average tip amount vary throughout the day (hourly) and across different weekdays (daily), providing insights into tipping patterns in NYC?
+* Do passengers tip more during holidays?"
+* Do pick-up and drop-off locations impact the amount of tips?
+
+
+## Contexts
+In NYC, Taxi & Limousine Commission (TLC) licenses over 130,000 vehicles and ensures these vehicles undergo thorough safety and emissions inspections. These vehicles must be driven by TLC-licensed drivers who have passed background checks and fulfilled education requirements mandated by the TLC. There are 4 different types of TLC-licensed vehicles: **Yellow Taxi**, **Green Taxi**, **For-Hire Vehicles**, and **Commuter Van and Paratransit**. This study is only focused on Yellow Taxi identified by the yellow color, taxi "T" markings, and medallion license numbers on the roof and sides of the vehicle.
+
+Here are some more information about the **Yellow Taxi** ([link to reference](https://www.nyc.gov/site/tlc/passengers/your-ride.page)):
+
+* Yellow Taxi is the only vehicle licensed to pick up street-hailing passengers anywhere in NYC.
+
+* Yellow Taxi charges standard metered fares for all street hail trips.
+
+* Yellow Taxi smartphone apps can offer set, upfront pricing for trips booked through an app.
+
+Here are some more information about the **Yellow Taxi fare system** ([link to reference](https://www.nyc.gov/site/tlc/passengers/taxi-fare.page)):
+
+* **Initial Charge**: The meter starts with a base fare when you enter the taxi. This initial charge is a fixed amount ($2.50 in 2014).
+
+* **Distance Charge**: As the taxi travels, there is a per-mile charge. The meter calculates this based on the distance covered during the trip ($2.50 per mile in 2014).
+
+* **Waiting Time**: If the taxi is is traveling under 12 miles per hour or is in slow-moving traffic, there may be a waiting time charge ($0.50 per minute in 2014).
+
+* **Surcharge**: Depending on the time and location, there might be surcharges. For example, there may be additional charges during peak hours or for trips to or from certain areas.
+
+* **Tolls and Fees**: Passengers are generally responsible for paying any tolls incurred during the trip. In addition to tolls, there may be additional fees for certain circumstances.
+
+* **Tips**: While tips are not part of the official fare, it's customary to tip taxi drivers in the United States. Passengers usually tip a percentage of the fare, typically around 15% to 20%.
+
+
+In **November 2014**, there were several holidays and events in New York City:
+
+* **NYC Marathon (November 2, 2014)**: The New York City Marathon is one of the world's largest marathons, with thousands of participants running through all five boroughs of the city. The event attracts runners from around the globe and is a major highlight for both participants and spectators.
+
+* **Veterans Day (November 11, 2014)**: Veterans Day is a federal holiday honoring military veterans. In NYC, there are often parades and events to commemorate and thank veterans for their service.
+
+* **NYC Documentary Film Festival (November 13-20, 2014)**: This film festival showcases a wide range of documentary films at various locations in the city. It's an excellent opportunity for film enthusiasts to explore thought-provoking and informative documentaries.
+
+* **Thanksgiving Day Parade (November 27, 2014)**: The Macy's Thanksgiving Day Parade is a famous annual event that takes place on Thanksgiving Day. The parade features giant balloons, floats, marching bands, and performances, attracting large crowds along the parade route.
+
+
