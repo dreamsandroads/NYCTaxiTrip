@@ -12,7 +12,7 @@ After some preliminary analysis, we noticed some issues with the data.
 
 We identified around 4,600 trips with incoherent pickup and dropoff datetimes: either the two datetimes are the same, or the pickup datetime is later than the dropoff datetime. We removed those rows.
 
-Given the NYC border longitudes and latitudes, there are around 255,952 rows with incorrect geographic locations. We removed those rows.
+Given the NYC border longitudes and latitudes, there are 255,952 rows with incorrect geographic locations. We removed those rows.
 
 Moreover, we plotted the relationship between the total amount of the trip and the trip distance. The corresponding scatter plot is shown below to highlight the outliers.
 
@@ -85,6 +85,8 @@ cat("Count of total missing values: ", sum(is.na(data)))
 colSums(is.na(data)) |> 
   sort(decreasing = TRUE)
 ```
+
+- Plot: Patterns in Missing Values
 ```{r}
 data <- data %>% 
         rename("vendorId" = "vendor_id",
@@ -107,10 +109,9 @@ data <- data %>%
                "total" = "total_amount")
 ```
 
-- Plot: Patterns in Missing Values
 ```{r fig.width=20, fig.height=10}
 library(redav)
 plot_missing(data, percent = TRUE)
 ```
 
-Nevertheless, all NA values from the data seem to have already been replaced with 0s (refer back to **2.1 data description** about zero-trip distance with non-zero total amount).
+Nevertheless, all NA values from the data seem to have already been replaced with 0s (refer back to scatter plot in **2.1 data description** shown zero-distance trips with non-zero total amount).
