@@ -1,5 +1,48 @@
 # Data
 
-## Description
+## Technical Description
+
+The original dataset, which describes all yellow taxi trips completed in 2014 in NYC, was downloaded on NYC OpenData website ([link to dataset](https://data.cityofnewyork.us/Transportation/2014-Yellow-Taxi-Trip-Data/gkne-dk5s)). The data was collected and provided to the NYC Taxi and Limousine Commission (TLC) by technology providers authorized under the Taxicab Passenger Enhancement Program (TPEP). Thus, the trip data was not created by the TLC and as explained on the agency website ([TLC website](https://www.nyc.gov/site/tlc/about/tlc-trip-record-data.page)), the TLC company cannot confirm the accuracy or completeness of these data. As a result, the data may not be representative of the total amount of trips dispatched by all TLC-licensed bases in 2014.
+
+The data was created on 06/03/2015, the data was last updated on 02/10/2016 and the metadata was last updated on 05/09/2022. The data is valuable for historic purposes so its update frequency is set to *Historical Data*.
+The downloaded dataset is a .csv file containing 165 million rows and 19 columns. Each row corresponds to a yellow taxi trip completed in 2014 in NYC and is described by 19 attributes including the vendor type, the pickup/dropoff time and geographic coordinates, the number of passengers, the trip distance, the fare amount, the tip amount etc... 
+
+Given the substantial size of the dataset and our initial motivations, we chose to select a reduced sample of the data. From the NYC OpenData website, we exported the taxi trips of November, 2014 only, as we are interested in how special events like Thanksgiving and NYC Marathon impact the trends. Moreover, the *payment_type* attribute, which indicates how the passenger paid for the trip, has 6 different levels: 1. Credit Card, 2. Cash, 3. No charge, 4. Dispute, 5. Unknown, 6. Voided trip. When looking at the data, the first and second category represent together 92\% of all taxi trips. We chose to filter out the other levels. The resulting dataset has around 12 million rows. 
+
+![](C:/Users/lisag/OneDrive/Bureau/Coursework/Fall 2023/EDAV/homework/NYCYellowTaxi/outliers.png){width=65%}
+
+
+After some preliminary analysis, we noticed some issues with the data. 
+
+
+```{r, echo=FALSE, results = FALSE, message=FALSE, warning = FALSE}
+library(tidyverse)
+library(data.table)
+library(ggplot2)
+library("ggplot2")
+library("tidyverse")
+library("ggmap")
+library("osmdata")
+library(lubridate)
+
+# Install and load necessary libraries
+# install.packages("tidyverse")
+
+Sys.setlocale("LC_TIME", "en_US.UTF-8")
+
+data = fread('C:/Users/lisag/OneDrive/Bureau/Coursework/Fall 2023/EDAV/homework/project/nyc_taxi_data_november.csv')
+
+data <- select(data, -V1)
+```
+
+For example, we can notice that there are around 70,000 zero-distance rides. We observe that the pickup and dropoff geographic coordinates are roughly the same. Moreover, the fare amount is non-zero. In fact, the lowest fare amount possible is equal to 2.5\$. We could infer that the dropoff location could not be tracked or that the trip was cancelled for example. For the purposes of our analysis, we chose to drop those rows.
+
+```{r}
+head(data[data$trip_distance == 0])
+```
+
+We also observe that more than 1,500 trips involved 0 passengers. We chose to remove those rows as well.
+ 
+## Research Plan
 
 ## Missing value analysis

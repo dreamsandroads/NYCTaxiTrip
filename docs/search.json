@@ -7,17 +7,24 @@
     "text": "1 Introduction"
   },
   {
-    "objectID": "data.html#description",
-    "href": "data.html#description",
+    "objectID": "data.html#technical-description",
+    "href": "data.html#technical-description",
     "title": "2  Data",
-    "section": "2.1 Description",
-    "text": "2.1 Description"
+    "section": "2.1 Technical Description",
+    "text": "2.1 Technical Description\nThe original dataset, which describes all yellow taxi trips completed in 2014 in NYC, was downloaded on NYC OpenData website (link to dataset). The data was collected and provided to the NYC Taxi and Limousine Commission (TLC) by technology providers authorized under the Taxicab Passenger Enhancement Program (TPEP). Thus, the trip data was not created by the TLC and as explained on the agency website (TLC website), the TLC company cannot confirm the accuracy or completeness of these data. As a result, the data may not be representative of the total amount of trips dispatched by all TLC-licensed bases in 2014.\nThe data was created on 06/03/2015, the data was last updated on 02/10/2016 and the metadata was last updated on 05/09/2022. The data is valuable for historic purposes so its update frequency is set to Historical Data. The downloaded dataset is a .csv file containing 165 million rows and 19 columns. Each row corresponds to a yellow taxi trip completed in 2014 in NYC and is described by 19 attributes including the vendor type, the pickup/dropoff time and geographic coordinates, the number of passengers, the trip distance, the fare amount, the tip amount etc…\nGiven the substantial size of the dataset and our initial motivations, we chose to select a reduced sample of the data. From the NYC OpenData website, we exported the taxi trips of November, 2014 only, as we are interested in how special events like Thanksgiving and NYC Marathon impact the trends. Moreover, the payment_type attribute, which indicates how the passenger paid for the trip, has 6 different levels: 1. Credit Card, 2. Cash, 3. No charge, 4. Dispute, 5. Unknown, 6. Voided trip. When looking at the data, the first and second category represent together 92% of all taxi trips. We chose to filter out the other levels. The resulting dataset has around 12 million rows.\n\nAfter some preliminary analysis, we noticed some issues with the data.\nFor example, we can notice that there are around 70,000 zero-distance rides. We observe that the pickup and dropoff geographic coordinates are roughly the same. Moreover, the fare amount is non-zero. In fact, the lowest fare amount possible is equal to 2.5$. We could infer that the dropoff location could not be tracked or that the trip was cancelled for example. For the purposes of our analysis, we chose to drop those rows.\n\n\nCode\nhead(data[data$trip_distance == 0])\n\n\n   vendor_id     pickup_datetime    dropoff_datetime passenger_count\n1:       CMT 2014-11-01 16:57:32 2014-11-01 16:58:21               1\n2:       CMT 2014-11-01 05:48:01 2014-11-01 05:48:35               1\n3:       CMT 2014-11-01 04:13:13 2014-11-01 04:13:34               2\n4:       CMT 2014-11-01 21:35:36 2014-11-01 21:36:01               1\n5:       CMT 2014-11-01 16:32:03 2014-11-01 16:38:39               2\n6:       CMT 2014-11-01 09:07:47 2014-11-01 09:08:15               1\n   trip_distance pickup_longitude pickup_latitude rate_code store_and_fwd_flag\n1:             0        -73.93604        40.85468         5                  N\n2:             0        -73.95223        40.77725         1                  N\n3:             0        -73.95201        40.78138         5                  N\n4:             0        -74.03833        40.73675         5                  N\n5:             0        -74.00371        40.75323         0                  N\n6:             0        -74.00156        40.72483         5                  N\n   dropoff_longitude dropoff_latitude payment_type fare_amount surcharge\n1:         -73.93612         40.85477          CRD        17.0       0.0\n2:         -73.95223         40.77722          CRD         2.5       0.5\n3:         -73.95205         40.78137          CRD        12.0       0.0\n4:         -74.03833         40.73674          CRD        50.0       0.0\n5:         -73.99257         40.76359          CRD         6.0       0.0\n6:         -74.00155         40.72483          CRD        24.0       0.0\n   mta_tax tip_amount tolls_amount total_amount\n1:     0.0        0.0            0         17.0\n2:     0.5        0.0            0          3.5\n3:     0.0        3.6            0         15.6\n4:     0.0       10.0            0         60.0\n5:     0.5        1.0            0          7.5\n6:     0.0        2.5            0         26.5\n\n\nWe also observe that more than 1,500 trips involved 0 passengers. We chose to remove those rows as well."
+  },
+  {
+    "objectID": "data.html#research-plan",
+    "href": "data.html#research-plan",
+    "title": "2  Data",
+    "section": "2.2 Research Plan",
+    "text": "2.2 Research Plan"
   },
   {
     "objectID": "data.html#missing-value-analysis",
     "href": "data.html#missing-value-analysis",
     "title": "2  Data",
-    "section": "2.2 Missing value analysis",
-    "text": "2.2 Missing value analysis"
+    "section": "2.3 Missing value analysis",
+    "text": "2.3 Missing value analysis"
   }
 ]
