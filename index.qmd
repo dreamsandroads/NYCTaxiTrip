@@ -2,9 +2,9 @@
 
 
 ## Motivation
-Yellow taxis are a crucial component of the transportation system in New York City (NYC). The decision to delve into the analysis of **NYC Yellow Taxi Trip** data for 2014 is driven by the desire to highlight patterns and trends that may offer valuable insights into the dynamics of yellow taxi usage, fare distribution, and passenger behaviors throughout 2014.
+Yellow taxis are a crucial component of the transportation system in New York City (NYC). The decision to delve into the analysis of **NYC Yellow Taxi Trip** data for 2014 is driven by the desire to highlight patterns and trends on different time scales that may offer valuable insights into the various characteristics of the NYC yellow taxi system.
 
-In 2014, across the months, the total number of trips is approximately uniform. Therefore, we focus on **November 2014**, a month with exciting holidays and events in NYC. November 2014 featured several notable holidays and events:
+In 2014, the total number of trips is approximately uniform across the 12 months. Therefore, we chose to focus on **November 2014**, a month with exciting holidays and events in NYC. November 2014 featured several notable holidays and events:
 
 * NYC Marathon (November 2, 2014)
 
@@ -14,20 +14,20 @@ In 2014, across the months, the total number of trips is approximately uniform. 
 
 * Thanksgiving Day Parade (November 27, 2014)
 
-This study serves as a gateway to understanding the complexity of NYC transportation patterns, particularly in November 2014. Through this exploration, we aim to highlight various aspects of the NYC yellow taxi system by comparing and contrasting the dynamics of yellow taxi usage, fare distribution, and passenger behaviors on holidays and event days with those on regular days.
+This study serves as a gateway to understanding the complexity of the NYC transportation system, particularly in November 2014. Through this exploration, we aim to compare and contrast the dynamics of yellow taxi usage, fare distribution, and tipping behaviors on holidays and event days with those on regular days.
 
 
 ## Research Question
 1. What is the trend in the number of trips in November 2014 by day?
-* Do weekends/holidays in the chosen month impact the number of trips?
+* Do weekends/holidays in November impact the number of trips?
 * What are the most and least busy locations during weekends/holidays compared to other days?
 
 2. NYC Yellow Taxi Fare Amount Trend:
 * What is the overall distribution of taxi fare amount in NYC, and what insights can be gained about the distribution?
-* Is there a relationship between fare amounts and time of the day, trip distance, or trip duration?
+* Is there a relationship between fare amounts and the time of the day, the trip distance, or the trip duration?
 
 3. NYC Yellow Taxi Tipping Trend:
-* How does the average tip amount vary throughout the day (hourly) and across different weekdays (daily), providing insights into tipping patterns in NYC?
+* How does the average tip amount vary throughout the day (hourly) and across different weekdays (daily), providing insights into tipping behaviors in NYC?
 * Do passengers tip more during holidays?"
 * Do pick-up and drop-off locations impact the amount of tips?
 
@@ -60,7 +60,7 @@ Here are some more information about the **Yellow Taxi fare system** ([link to r
 
 In **November 2014**, there were several holidays and events in New York City:
 
-* **NYC Marathon (November 2, 2014)**: The New York City Marathon is one of the world's largest marathons, with thousands of participants running through all five boroughs of the city. The event attracts runners from around the globe and is a major highlight for both participants and spectators.
+* **NYC Marathon (November 2, 2014)**: The New York City Marathon is one of the world's largest marathons, with around 50,000 participants running through all five boroughs of the city. The event attracts runners from around the globe and is a major highlight for both participants and spectators.
 
 * **Veterans Day (November 11, 2014)**: Veterans Day is a federal holiday honoring military veterans. In NYC, there are often parades and events to commemorate and thank veterans for their service.
 

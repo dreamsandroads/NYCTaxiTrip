@@ -8,7 +8,7 @@
 
 <meta name="author" content="Suyeon Ju (sj3319)">
 <meta name="author" content="Lisa Guo (lzg2105)">
-<meta name="dcterms.date" content="2023-11-29">
+<meta name="dcterms.date" content="2023-11-30">
 
 <title>NYC Yellow Taxi Trips</title>
 <style>
@@ -4523,7 +4523,12 @@ vertical-align: -.125em;
     <h2 id="toc-title">Table of contents</h2>
    
   <ul>
-  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a></li>
+  <li><a href="#introduction" id="toc-introduction" class="nav-link active" data-scroll-target="#introduction"><span class="header-section-number">1</span> Introduction</a>
+  <ul class="collapse">
+  <li><a href="#motivation" id="toc-motivation" class="nav-link" data-scroll-target="#motivation"><span class="header-section-number">1.1</span> Motivation</a></li>
+  <li><a href="#research-question" id="toc-research-question" class="nav-link" data-scroll-target="#research-question"><span class="header-section-number">1.2</span> Research Question</a></li>
+  <li><a href="#contexts" id="toc-contexts" class="nav-link" data-scroll-target="#contexts"><span class="header-section-number">1.3</span> Contexts</a></li>
+  </ul></li>
   </ul>
 <div class="toc-actions"><div><i class="bi bi-github"></i></div><div class="action-links"><p><a href="https://github.com/dreamsandroads/NYCTaxiTrip/edit/main/index.qmd" class="toc-action">Edit this page</a></p><p><a href="https://github.com/dreamsandroads/NYCTaxiTrip/issues/new" class="toc-action">Report an issue</a></p></div></div></nav>
     </div>
@@ -4550,7 +4555,7 @@ vertical-align: -.125em;
     <div>
     <div class="quarto-title-meta-heading">Published</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">November 29, 2023</p>
+      <p class="date">November 30, 2023</p>
     </div>
   </div>
   
@@ -4562,8 +4567,71 @@ vertical-align: -.125em;
 
 <section id="introduction" class="level1" data-number="1">
 <h1 data-number="1"><span class="header-section-number">1</span> Introduction</h1>
+<section id="motivation" class="level2" data-number="1.1">
+<h2 data-number="1.1" class="anchored" data-anchor-id="motivation"><span class="header-section-number">1.1</span> Motivation</h2>
+<p>Yellow taxis are a crucial component of the transportation system in New York City (NYC). The decision to delve into the analysis of <strong>NYC Yellow Taxi Trip</strong> data for 2014 is driven by the desire to highlight patterns and trends on different time scales that may offer valuable insights into the various characteristics of the NYC yellow taxi system.</p>
+<p>In 2014, the total number of trips is approximately uniform across the 12 months. Therefore, we chose to focus on <strong>November 2014</strong>, a month with exciting holidays and events in NYC. November 2014 featured several notable holidays and events:</p>
+<ul>
+<li><p>NYC Marathon (November 2, 2014)</p></li>
+<li><p>Veterans Day (November 11, 2014)</p></li>
+<li><p>NYC Documentary Film Festival (November 13-20, 2014)</p></li>
+<li><p>Thanksgiving Day Parade (November 27, 2014)</p></li>
+</ul>
+<p>This study serves as a gateway to understanding the complexity of the NYC transportation system, particularly in November 2014. Through this exploration, we aim to compare and contrast the dynamics of yellow taxi usage, fare distribution, and tipping behaviors on holidays and event days with those on regular days.</p>
+</section>
+<section id="research-question" class="level2" data-number="1.2">
+<h2 data-number="1.2" class="anchored" data-anchor-id="research-question"><span class="header-section-number">1.2</span> Research Question</h2>
+<ol type="1">
+<li>What is the trend in the number of trips in November 2014 by day?</li>
+</ol>
+<ul>
+<li>Do weekends/holidays in November impact the number of trips?</li>
+<li>What are the most and least busy locations during weekends/holidays compared to other days?</li>
+</ul>
+<ol start="2" type="1">
+<li>NYC Yellow Taxi Fare Amount Trend:</li>
+</ol>
+<ul>
+<li>What is the overall distribution of taxi fare amount in NYC, and what insights can be gained about the distribution?</li>
+<li>Is there a relationship between fare amounts and the time of the day, the trip distance, or the trip duration?</li>
+</ul>
+<ol start="3" type="1">
+<li>NYC Yellow Taxi Tipping Trend:</li>
+</ol>
+<ul>
+<li>How does the average tip amount vary throughout the day (hourly) and across different weekdays (daily), providing insights into tipping behaviors in NYC?</li>
+<li>Do passengers tip more during holidays?”</li>
+<li>Do pick-up and drop-off locations impact the amount of tips?</li>
+</ul>
+</section>
+<section id="contexts" class="level2" data-number="1.3">
+<h2 data-number="1.3" class="anchored" data-anchor-id="contexts"><span class="header-section-number">1.3</span> Contexts</h2>
+<p>In NYC, Taxi &amp; Limousine Commission (TLC) licenses over 130,000 vehicles and ensures these vehicles undergo thorough safety and emissions inspections. These vehicles must be driven by TLC-licensed drivers who have passed background checks and fulfilled education requirements mandated by the TLC. There are 4 different types of TLC-licensed vehicles: <strong>Yellow Taxi</strong>, <strong>Green Taxi</strong>, <strong>For-Hire Vehicles</strong>, and <strong>Commuter Van and Paratransit</strong>. This study is only focused on Yellow Taxi identified by the yellow color, taxi “T” markings, and medallion license numbers on the roof and sides of the vehicle.</p>
+<p>Here are some more information about the <strong>Yellow Taxi</strong> (<a href="https://www.nyc.gov/site/tlc/passengers/your-ride.page">link to reference</a>):</p>
+<ul>
+<li><p>Yellow Taxi is the only vehicle licensed to pick up street-hailing passengers anywhere in NYC.</p></li>
+<li><p>Yellow Taxi charges standard metered fares for all street hail trips.</p></li>
+<li><p>Yellow Taxi smartphone apps can offer set, upfront pricing for trips booked through an app.</p></li>
+</ul>
+<p>Here are some more information about the <strong>Yellow Taxi fare system</strong> (<a href="https://www.nyc.gov/site/tlc/passengers/taxi-fare.page">link to reference</a>):</p>
+<ul>
+<li><p><strong>Initial Charge</strong>: The meter starts with a base fare when you enter the taxi. This initial charge is a fixed amount ($2.50 in 2014).</p></li>
+<li><p><strong>Distance Charge</strong>: As the taxi travels, there is a per-mile charge. The meter calculates this based on the distance covered during the trip ($2.50 per mile in 2014).</p></li>
+<li><p><strong>Waiting Time</strong>: If the taxi is is traveling under 12 miles per hour or is in slow-moving traffic, there may be a waiting time charge ($0.50 per minute in 2014).</p></li>
+<li><p><strong>Surcharge</strong>: Depending on the time and location, there might be surcharges. For example, there may be additional charges during peak hours or for trips to or from certain areas.</p></li>
+<li><p><strong>Tolls and Fees</strong>: Passengers are generally responsible for paying any tolls incurred during the trip. In addition to tolls, there may be additional fees for certain circumstances.</p></li>
+<li><p><strong>Tips</strong>: While tips are not part of the official fare, it’s customary to tip taxi drivers in the United States. Passengers usually tip a percentage of the fare, typically around 15% to 20%.</p></li>
+</ul>
+<p>In <strong>November 2014</strong>, there were several holidays and events in New York City:</p>
+<ul>
+<li><p><strong>NYC Marathon (November 2, 2014)</strong>: The New York City Marathon is one of the world’s largest marathons, with around 50,000 participants running through all five boroughs of the city. The event attracts runners from around the globe and is a major highlight for both participants and spectators.</p></li>
+<li><p><strong>Veterans Day (November 11, 2014)</strong>: Veterans Day is a federal holiday honoring military veterans. In NYC, there are often parades and events to commemorate and thank veterans for their service.</p></li>
+<li><p><strong>NYC Documentary Film Festival (November 13-20, 2014)</strong>: This film festival showcases a wide range of documentary films at various locations in the city. It’s an excellent opportunity for film enthusiasts to explore thought-provoking and informative documentaries.</p></li>
+<li><p><strong>Thanksgiving Day Parade (November 27, 2014)</strong>: The Macy’s Thanksgiving Day Parade is a famous annual event that takes place on Thanksgiving Day. The parade features giant balloons, floats, marching bands, and performances, attracting large crowds along the parade route.</p></li>
+</ul>
 
 
+</section>
 </section>
 
 </main> <!-- /main -->

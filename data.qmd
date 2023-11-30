@@ -9,10 +9,17 @@ The downloaded dataset is a .csv file containing 165 million rows and 19 columns
 
 Given the substantial size of the dataset and our initial motivations, we chose to select a reduced sample of the data. From the NYC OpenData website, we exported the taxi trips of November, 2014 only, as we are interested in how special events like Thanksgiving and NYC Marathon impact the trends. Moreover, the *payment_type* attribute, which indicates how the passenger paid for the trip, has 6 different levels: 1. Credit Card, 2. Cash, 3. No charge, 4. Dispute, 5. Unknown, 6. Voided trip. When looking at the data, the first and second category represent together 92\% of all taxi trips. We chose to filter out the other levels. The resulting dataset has around 12 million rows. 
 
-![](C:/Users/lisag/OneDrive/Bureau/Coursework/Fall 2023/EDAV/homework/NYCYellowTaxi/outliers.png){width=65%}
 
 
 After some preliminary analysis, we noticed some issues with the data. 
+
+We identified around 4,600 trips with incoherent pickup and dropoff datetimes: either the two datetimes are the same, either the pickup datetime is later than the dropoff datetime. We removed those rows.
+
+Given the NYC border longitudes and latitudes, there are around 255,952 rows with incorrect geographic locations. We dropped those rows.
+
+Moreover, we plotted the relationship between the total amount of the trip and the trip distance. The corresponding scatter plot is shown below to highlight the outliers.
+
+![](C:/Users/lisag/OneDrive/Bureau/Coursework/Fall 2023/EDAV/homework/project/outliers2.png){width=80%}
 
 
 ```{r, echo=FALSE, results = FALSE, message=FALSE, warning = FALSE}
@@ -35,14 +42,35 @@ data = fread('C:/Users/lisag/OneDrive/Bureau/Coursework/Fall 2023/EDAV/homework/
 data <- select(data, -V1)
 ```
 
-For example, we can notice that there are around 70,000 zero-distance rides. We observe that the pickup and dropoff geographic coordinates are roughly the same. Moreover, the fare amount is non-zero. In fact, the lowest fare amount possible is equal to 2.5\$. We could infer that the dropoff location could not be tracked or that the trip was cancelled for example. For the purposes of our analysis, we chose to drop those rows.
+First, we can notice on the above plot that there are around 70,000 zero-distance rides. We observe that the pickup and dropoff geographic coordinates are roughly the same. Moreover, the total fare amount is non-zero. In fact, the lowest fare amount possible is equal to 2.5\$. We could infer that the dropoff location could not be tracked or that the trip was cancelled for example. For the purposes of our analysis, we chose to drop those rows.
 
 ```{r}
 head(data[data$trip_distance == 0])
 ```
 
+Second, we notice that there are rides large distance rides and very low total fare amounts. As seen on the scatter plot, we can discard rides with trip distances of more than 25 miles and close-to-zero trip total amounts. For other data points, we don't have enough information to decide whether they are outliers or not, and hence, we chose to keep those observations.
+
 We also observe that more than 1,500 trips involved 0 passengers. We chose to remove those rows as well.
  
 ## Research Plan
+
+The 19 attributes contained in the dataset, added to new variables that we are going to create, will both help us answer the research questions from the introduction. New variables include:
+
+* trip duration in minutes (using pickup datatime and dropoff datetime columns)
+
+* month, weekdays, hour of the day (using pickup datatime column)
+
+* period of the day (using pickup datetime column)
+
+* fare amount per mile in dollars/mile (using fare amount and trip distance columns)
+
+We have at our disposal all the taxi trips in 2014 as well as the pickup times in datetime format. Using *lubridate* package, we are able to retrieve the month, day of the month, weekday and hour the pickup/dropoff datetimes. Those new columns are useful to visualize the trends throughout different time scales. In particular, we may visualize the trend in the number of trips by day in November and identify whether weekends, holidays or special events like NYC Marathon may impact the number of trips.
+Given the geographic coordinates (longitude and latitude) of pickup and dropoff locations, we are able to map the taxi trips. In particular, we may visualize the most and least busy pickup/dropoff locations on a NYC map. The datetime will also allow us to visualize how holidays and special events may impact the distribution of pickup/dropoff location in the city. It would be interesting to visualize the business working hours by mapping the number of pickups/dropoffs between different periods of the day for a given location like the Financial District or World Trade Center Area.
+
+Using the *fare_amount* attribute, we can visualize the overall distribution of the taxi fares across the different periods of the day and days of the week. Comparing the results for holidays and the results for usual days, we can determine whether the fares are increasing or decreasing. It would be interesting to combine this attribute with the trip distance or the trip duration to identify whether there is a correlation between these variables.
+
+Similarly, with the *tip_amount* column, we can study the tipping trend across different periods of the day and different days of the week. We may check if special events happening in the month may affect the tipping behavior of passengers. Finally, using the longitude and latitude variables, we can compare the average tips for different pickup/dropoff locations.
+
+
 
 ## Missing value analysis
