@@ -34,7 +34,7 @@ svg.append("text").attr("x", 50).attr("y", -15).text("Weekday").style("font-size
 svg.append("text").attr("x", 150).attr("y", -15).text("Weekend").style("font-size", "15px")
 
 // add data
-d3.csv("https://raw.githubusercontent.com/suyeonju101/PracticeD3/main/numtripbyday.csv").then(function(d) {
+d3.csv("https://raw.githubusercontent.com/dreamsandroads/NYCTaxiTrip/main/data/numtripbyday.csv").then(function(d) {
     // add x-axis
     var xScale = d3.scaleBand()
       .domain(d.map(d => d.day))
