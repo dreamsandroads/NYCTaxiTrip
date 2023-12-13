@@ -1,13 +1,32 @@
-# Interactive graph
+# Interactive Graph
 
 <style>
   * {
     font-family: sans-serif;
   }
-</style> 
+</style>
+
+<h2>Context</h2>
+<p style="font-size: 16px;">This graph illustrates the number of NYC yellow taxi rides per day, displaying the range of tip percentages (minimum, median, maximum) with a focus on November 2014. Given the information on holidays/events in NYC, feel free to explore the specific day you are interested in.</p>
+<p style="font-size: 16px;">Holidays/Events:</p>
+<ul style="font-size: 16px;">
+  <li>NYC Marathon (November 2, 2014)</li>
+  <li>Veterans Day (November 11, 2014)</li>
+  <li>NYC Documentary Film Festival (November 13-20, 2014)</li>
+  <li>Thanksgiving Day Parade (November 27, 2014)</li>
+</ul>
+<p style="font-size: 16px;">Examples of interesting key findings:</p>
+<ul style="font-size: 16px;">
+  <li>People tend to tip less during weekends.</li>
+  <li>On Thanksgiving day and the Thanksgiving holidays (27th, 28th, and 29th), the median tip percentage is 0%.</li>
+</ul>
+
+<h2>Graph</h2>
+<h3>Number of NYC Yellow Taxi Rides per Day with Tip Percentage</h3>
 
 <div id="plot">
 </div>
+
 
 <script src="https://cdn.jsdelivr.net/npm/d3@7"></script>
 <script src="scripts/myscript.js"></script>
