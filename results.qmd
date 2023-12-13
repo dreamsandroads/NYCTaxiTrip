@@ -1,1 +1,525 @@
 # Results
+
+
+```{r, echo=FALSE, results = FALSE, message=FALSE, warning = FALSE}
+library(tidyverse)
+library(data.table)
+library(ggplot2)
+library(ggmap)
+library(osmdata)
+library(lubridate)
+library(scales)
+library(leaflet)
+library(leafgl)
+library(ggridges)
+```
+
+
+```{r, echo=FALSE, results = FALSE, message=FALSE, warning = FALSE}
+
+# DATA CLEANING
+# Set to US system
+Sys.setlocale("LC_TIME", "en_US.UTF-8")
+
+# Reading the dataset
+data = fread('/Users/suyeonju/Desktop/STATS 5702/Project/data/nyc_taxi_data_november.csv')
+# data = fread('C:/Users/lisag/OneDrive/Bureau/Coursework/Fall 2023/EDAV/homework/project/nyc_taxi_data_november.csv')
+
+# Focusing on trips paid by Cash or Credit Card payment types
+data <- select(data, -V1)
+data <- data |> 
+  filter(payment_type == 'CSH' | payment_type == 'CRD')
+
+taxi <- filter(data, trip_distance != 0)
+taxi <- filter(taxi, pickup_datetime <= dropoff_datetime)
+
+taxi <- filter(taxi, pickup_latitude <= 40.92 & 
+                 pickup_latitude >= 40.49 & 
+                 dropoff_latitude <= 40.92 & 
+                 dropoff_latitude >= 40.49 & 
+                 pickup_longitude <= -73.68 & 
+                 pickup_longitude >= -74.27 & 
+                 dropoff_longitude <= -73.68 & 
+                 dropoff_longitude >= -74.27)
+
+taxi <- filter(taxi, passenger_count != 0)
+
+## R Issue with dplyr::filter: It cannot recognized all doubles.
+# https://github.com/tidyverse/dplyr/issues/3031
+# https://cran.r-project.org/doc/FAQ/R-FAQ.html#Why-doesn_0027t-R-think-these-numbers-are-equal_003f
+# look at 7.31 freq question
+
+## Solution: Convert numeric to character (then convert back to numeric after comparing and filtering)
+taxi_removed <- taxi |> 
+  mutate(cal_total = fare_amount + surcharge + mta_tax + tip_amount + tolls_amount) |> 
+  mutate(cal_total = as.character(cal_total)) |> 
+  mutate(total_amount = as.character(total_amount)) |> 
+  filter(cal_total != total_amount)
+
+
+taxi <- taxi |> 
+  mutate(cal_total = fare_amount + surcharge + mta_tax + tip_amount + tolls_amount) |> 
+  mutate(cal_total = as.character(cal_total)) |> 
+  mutate(total_amount = as.character(total_amount)) |> 
+  filter(cal_total == total_amount) |> 
+  mutate(cal_total = as.numeric(cal_total)) |> 
+  mutate(total_amount = as.numeric(total_amount))
+
+taxi$trip_duration <- as.numeric(difftime(taxi$dropoff_datetime, taxi$pickup_datetime, units="mins"))
+
+taxi <- taxi |> 
+  filter(trip_duration < 1440)
+
+
+taxi$day <- day(taxi$pickup_datetime)
+taxi$weekday <- weekdays(taxi$pickup_datetime)
+taxi$hour <- hour(taxi$pickup_datetime)
+
+taxi <- taxi  |> 
+  mutate(hour_category = case_when(
+      between(hour,4,6) ~ 'early morning',
+      between(hour,7,10) ~'morning',
+      between(hour,11,13) ~'noon',
+      between(hour,14,17) ~'afternoon',
+      between(hour,18,22) ~'evening',
+      TRUE ~ 'midnight'))
+
+taxi$tip_percentage <- taxi$tip_amount / taxi$total_amount
+
+# Identify Sundays and Saturdays
+taxi$weekend_color <- ifelse(taxi$weekday %in% c("Saturday", "Sunday"), "Weekend", "Weekday")
+```
+
+## What is the trend in the number of trips in November 2014 by day?
+
+### Do weekends/holidays in November impact the number of trips?
+```{r}
+# Remove scientific notations on the y-axis
+options(scipen = 999) 
+```
+
+```{r}
+# November 1st, 2014 was a Saturday
+ggplot(taxi, aes(x = day, fill = weekend_color)) +
+  geom_bar() +
+  labs(title = "Number of NYC Taxi Rides per Day in November", x = "Day", y = "Count") +
+  scale_x_continuous(breaks = seq(1, 30, 1)) +
+  scale_y_continuous(labels = function(l) {trans = l / 1000; paste0(trans, "K")}) +
+  scale_fill_manual(values = c("Weekday" = "grey", "Weekend" = "lightblue"), 
+                    name = "Type of Day") +
+  theme(legend.position = "top")
+```
+Holidays/Special Events in November
+
+* NYC Marathon (November 2, 2014)
+
+* Veterans Day (November 11, 2014)
+
+* NYC Documentary Film Festival (November 13-20, 2014) 
+
+* **Thanksgiving Day Parade (November 27, 2014)**: There is a noticeable decrease in the number of taxi rides on Thanksgiving Day and during the Thanksgiving weekend.
+
+In general, there are consistently more taxi trips on Saturdays than on any other day. More precisely, there are around 500k trips (80k more than the overall median) every Saturday of November. The plot also shows that the number of taxi trips increase gradually from Monday to Saturday, except for the week of Thanksgiving.
+
+We also observe a peak on the 1st of November:
+```{r fig.height=10, fig.width=18,  message=FALSE, warning = FALSE}
+ggplot(taxi, aes(x = hour, fill=weekend_color)) +
+  geom_bar() +
+  labs(title = "Hourly Number of NYC Taxi Trips on Days in November",
+       x = "Hour", y = "Count") +
+  scale_fill_manual(values = c("Weekday" = "grey", "Weekend" = "lightblue"), 
+                    name = "Type of Day") +
+  scale_x_continuous(breaks = seq(0, 23, 1)) +
+  scale_y_continuous(labels = function(l) {trans = l / 1000; paste0(trans, "K")}) +
+  geom_rect(data = subset(taxi, day %in% c(1)), 
+            fill = NA, colour = "red",
+            xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf) +
+  facet_wrap(. ~ day) +
+  theme(legend.position="top",
+        axis.text.x = element_text(size=6, angle=0),
+        plot.title = element_text(size=20),
+        legend.title = element_text(size = 18),
+        legend.text = element_text(size = 18))
+```
+
+One explanation could be that more people took taxis after Halloween events (Halloween: October 31st). The trend of hourly taxi rides on November 1st is not distinct compared to other days. However, the numbers of taxi rides per hour are higher than on any other day. Unfortunately, we do not have enough information to explain the higher demand of taxi rides on November 1st compared to other days.
+
+We also investigate the average hourly number of trips for weekdays and weekends (weekdays vs. weekends).
+```{r, message=FALSE, warning = FALSE}
+hourly_sum <- taxi %>%
+  group_by(weekend_color, hour) %>%
+  summarise(sum_count = sum(n()))
+
+# Calculate the number of weekdays and weekends
+daily_counts <- taxi %>%
+  group_by(weekend_color) %>%
+  summarise(daily_count = n_distinct(day))
+
+hourly_sum <- merge(hourly_sum, daily_counts, by = "weekend_color")
+
+# Calculate the standardized average
+hourly_sum <- hourly_sum %>%
+  mutate(standardized_avg = sum_count / daily_count)
+
+
+# Plotting the data
+ggplot(hourly_sum, aes(x = hour, y = standardized_avg)) +
+  geom_bar(stat = 'identity', aes(fill = weekend_color)) +
+  labs(title = "Average Hourly Number of NYC Taxi Trips (Weekdays vs. Weekends)",
+       x = "Hour", y = "Count") +
+  scale_x_continuous(breaks = seq(0, 23, 1)) +
+  scale_y_continuous(labels = function(l) {trans = l / 1000; paste0(trans, "K")}) +
+  scale_fill_manual(values = c("Weekday" = "grey", "Weekend" = "lightblue"), 
+                    name = "Type of Day") +
+  theme(legend.position = "top",
+        axis.text.x = element_text(size=6, angle=0)) +
+  facet_grid(. ~ weekend_color)
+```
+
+Overall, the number of rides is significantly higher during midnight and early morning hours on weekends than on weekdays. This is probably because people return from parties and night events more frequently on weekends than on weekdays. Other than this, the trend seems quite similar. For weekdays, the busiest hours are from 6 pm to 8 pm, which is logical as this is the time frame when people return from their offices. Evenings are generally busier than any other time of the day.
+
+
+### What are the most and least busy locations during weekends/holidays compared to other days?
+
+#### Overview
+
+```{r, message=FALSE, warning = FALSE}
+set.seed(123)  
+sample_size <- 10000 
+
+# Subsampling on a regular Sunday
+reg_sunday <- taxi[taxi$day == 9 & taxi$hour >= 9 & taxi$hour <= 13]
+subsampled_data <- reg_sunday[sample(nrow(reg_sunday), sample_size), ]
+```
+
+Here is an interactive map showing the **NYC Yellow Taxi Pickup and Dropoff Locations**:
+
+```{r, message=FALSE, warning = FALSE}
+
+
+leaflet(subsampled_data) %>% 
+    addTiles() %>%
+    setView(-73.9, 40.75, zoom = 11) %>% 
+    addCircles(~pickup_longitude, ~pickup_latitude, weight = 1, radius=10, 
+                 color="red", stroke = FALSE, fillOpacity = 0.7) %>%
+    addCircles(~dropoff_longitude, ~dropoff_latitude, weight = 1, radius=10, 
+                 color="blue", stroke = FALSE, fillOpacity = 0.7) %>% 
+    addLegend("bottomright", colors= c("blue", "", "red"), labels=c("Dropoff Locations", "", "Pickup Locations")) 
+```
+
+The majority of the data points concentrate in Manhattan, indicating high taxi activity within the borough. In particular, Midtown and Lower Manhattan appear as central hubs with a significant concentration of pickups and dropoffs. Upon closer inspection of the map, we notice that Times Square, Grand Central, and Penn Stations stand out as major contributors to the high density of taxi pickups and dropoffs. Beyond Manhattan, airports such as JFK, Newark, and LaGuardia exhibit substantial taxi traffic.
+
+These results highlight the significance of train stations and airports as major transportation hubs, with many passengers utilizing taxi services for departures and arrivals.
+
+
+#### Focusing on NYC Marathon (November 2nd, 9 AM to 1 PM)
+
+```{r}
+# Sub-sampling on marathon day
+marathon <- taxi[taxi$day == 2 & taxi$hour >= 9 & taxi$hour <= 13]
+subsampled_marathon <- marathon[sample(nrow(marathon), sample_size), ]
+```
+
+```{r, message=FALSE, warning = FALSE}
+register_google(key = "AIzaSyDaXmGKnccck8fdJe6lOUzGlrqMBl-InZ0")
+
+nyc <- c(lon = -73.971321, lat = 40.776676)
+nyc_map <- get_map(location = nyc, zoom = 12)
+
+p <- ggmap(nyc_map)
+
+regular_sunday <- p +
+  geom_point(data = subsampled_data, aes(x = pickup_longitude, y = pickup_latitude, color = 'Pickup'), size = 0.4) +
+  geom_point(data = subsampled_data, aes(x = dropoff_longitude, y = dropoff_latitude, color = 'Dropoff'), size = 0.4) +
+  scale_color_manual(values = c('Pickup' = "red", "Dropoff" = "blue"), name = "Location") +
+  labs(title = "Rides on Regular Sundays") +
+  theme(legend.position = "top",
+        title = element_text(size = 8))
+
+marathon <- p +
+  geom_point(data = subsampled_marathon, aes(x = pickup_longitude, y = pickup_latitude, color = "Pickup"), size = 0.4) + 
+  geom_point(data = subsampled_marathon, aes(x = dropoff_longitude, y = dropoff_latitude, color = "Dropoff"), size = 0.4) +
+  scale_color_manual(values = c("Pickup" = "red", "Dropoff" = "blue"), name = "Location") +
+  labs(title = "Rides on the Marathon Day (November 2nd)") +
+  theme(legend.position = "top",
+        title = element_text(size = 8))
+
+combined_map <- cowplot::plot_grid(regular_sunday, marathon, ncol = 2)
+
+combined_map
+```
+The plot on the left illustrates taxi pickups and dropoffs for a typical Sunday between 9 am and 1 pm, while the plot on the right displays data points for Marathon day (2nd of November) within the same time frame. We can clearly estimate part of the race route. There are notably fewer data points along both First Avenue and the northern section of Fifth Avenue around Central Park. Indeed, the marathon route goes all the way up to the Bronx along 135th Avenue via First Avenue and then down to the southern part of Central Park via Fifth Avenue, which explains the reduced number of data points in these specific areas.
+
+
+#### Focusing on Thanksgiving Parade
+```{r, message=FALSE, warning = FALSE}
+bef_tgv <- taxi[taxi$day == 26 & taxi$hour >= 8 & taxi$hour <= 12]
+subsampled_bef_tgv <- bef_tgv[sample(nrow(bef_tgv), sample_size), ]
+
+on_tgv <- taxi[taxi$day == 27 & taxi$hour >= 8 & taxi$hour <= 12]
+subsampled_on_tgv <- on_tgv[sample(nrow(on_tgv), sample_size), ]
+
+aft_tgv <- taxi[taxi$day == 28 & taxi$hour >= 8 & taxi$hour <= 12]
+subsampled_aft_tgv <- aft_tgv[sample(nrow(aft_tgv), sample_size), ]
+```
+
+
+```{r, message=FALSE, warning = FALSE}
+# Penn Station:
+# nyc <- c(lon = -73.993584, lat = 40.750580)
+# JFK airport:
+# nyc <- c(lon = -73.780968, lat = 40.641766)
+
+# Grand Central:
+nyc <- c(lon = -73.977295, lat = 40.752655)
+
+nyc_map <- get_map(location = nyc, zoom = 13)
+
+p <- ggmap(nyc_map)
+
+plot_bef_tgv <- p +
+  geom_point(data = subsampled_bef_tgv, aes(x = pickup_longitude, y = pickup_latitude, color = 'Pickup'), size = 0.4) +
+  geom_point(data = subsampled_bef_tgv, aes(x = dropoff_longitude, y = dropoff_latitude, color = 'Dropoff'), size = 0.4) +
+  scale_color_manual(values = c('Pickup' = "red", "Dropoff" = "blue"), name = "Location") +
+  labs(title = "Rides Before Thanksgiving (26th)") +
+  theme(legend.position = "top",
+        plot.title = element_text(size=12))
+
+plot_on_tgv <- p +
+  geom_point(data = subsampled_on_tgv, aes(x = pickup_longitude, y = pickup_latitude, color = "Pickup"), size = 0.4) + 
+  geom_point(data = subsampled_on_tgv, aes(x = dropoff_longitude, y = dropoff_latitude, color = "Dropoff"), size = 0.4) +
+  scale_color_manual(values = c("Pickup" = "red", "Dropoff" = "blue"), name = "Location") +
+  labs(title = "Rides on Thanksgiving Day (27th)") +
+  theme(legend.position = "top",
+        plot.title = element_text(size=12))
+
+combined_map1 <- cowplot::plot_grid(plot_bef_tgv, plot_on_tgv, ncol = 2)
+
+combined_map1
+```
+
+The plot on the left illustrates taxi pickups and dropoffs for the day before Thanksgiving (26th, November) between 8 am and 12 pm, while the plot on the right displays data points for Thanksgiving day (27th, November) within the same time frame. Similarly, there are noticeably fewer data points around Sixth Avenue from 59th Street to 35th Street, where the Thanksgiving parade ends (also Macy's location).
+
+We would like to see if there is any difference in taxi trips before and after Thanksgiving, particularly near the Grand Central Station.
+```{r, message=FALSE, warning = FALSE}
+nyc <- c(lon = -73.977295, lat = 40.752655)
+
+nyc_map <- get_map(location = nyc, zoom = 15)
+
+p <- ggmap(nyc_map)
+
+plot_bef_tgv <- p +
+  geom_point(data = subsampled_bef_tgv, aes(x = pickup_longitude, y = pickup_latitude, color = 'Pickup'), size = 0.4) +
+  geom_point(data = subsampled_bef_tgv, aes(x = dropoff_longitude, y = dropoff_latitude, color = 'Dropoff'), size = 0.4) +
+  scale_color_manual(values = c('Pickup' = "red", "Dropoff" = "blue"), name = "Location") +
+  labs(title = "Rides Before Thanksgiving (26th)") +
+  theme(legend.position = "top",
+        plot.title = element_text(size=12))
+
+plot_aft_tgv <- p +
+  geom_point(data = subsampled_aft_tgv, aes(x = pickup_longitude, y = pickup_latitude, color = "Pickup"), size = 0.4) + 
+  geom_point(data = subsampled_aft_tgv, aes(x = dropoff_longitude, y = dropoff_latitude, color = "Dropoff"), size = 0.4) +
+  scale_color_manual(values = c("Pickup" = "red", "Dropoff" = "blue"), name = "Location") +
+  labs(title = "Rides After Thanksgiving Day (28th)") +
+  theme(legend.position = "top",
+        plot.title = element_text(size=12))
+
+combined_map2 <- cowplot::plot_grid(plot_bef_tgv, plot_aft_tgv, ncol = 2)
+
+combined_map2
+```
+
+We conclude that there is not much of a difference in trips near the Grand Central between the day before and after Thanksgiving.
+
+
+## NYC Yellow Taxi Fare Amount Trend 
+
+### What is the overall distribution of taxi fare amount in NYC, and what insights can be gained about the distribution?
+
+```{r}
+ggplot(taxi, aes(x = fare_amount)) +
+  geom_density(alpha = 3) +
+  labs(title = "Distribution of NYC Taxi Fare Amounts", x = "Fare Amount ($)", y = "Density")
+```
+
+We observe that the distribution is highly skewed to the right, indicating that the majority of fare amounts are fairly low. As shown in the graph, most fare amounts fall between 0 and 50 dollars (there is a peak around 50 dollars).
+
+Hence, we decide to take a closer look at fare amounts up to 100 dollars.
+```{r}
+# only 1726 trips are higher than 100 dollars so we can cut off those values
+# nrow(taxi[taxi$fare_amount > 100])
+
+taxi |> filter(taxi$fare_amount <= 100) |> 
+  ggplot(aes(x=fare_amount)) + 
+  geom_histogram(binwidth = 5) +
+  scale_x_continuous(breaks = seq(0,100, by=5)) +
+  scale_y_continuous(labels = function(l) {trans = l / 1000000; paste0(trans, "M")}) +
+  labs(title = "Distribution of NYC Taxi Fare Amounts (~ $100)", x = "Fare Amount ($)", y = "Count") 
+```
+
+We observe that the majority of fare amounts are small values, typically from 2.5 to 10 dollars, reflecting the prevalence of short-distance trips. Additionally, there is a small peak at 50 dollars.
+
+```{r, message=FALSE, warning = FALSE}
+# Mean fare amount per hour and payment type
+taxi %>%
+  group_by(weekend_color, hour, payment_type) %>%
+  summarize(mean.fare = mean(fare_amount)) %>%
+  ggplot(aes(x = hour, y = mean.fare, color = payment_type, group = payment_type)) +
+  geom_point(stat = 'identity' ) +
+  geom_line(stat = 'identity', linetype = 'dotted') +
+  scale_color_discrete(labels=c('Credit Card', 'Cash')) +
+  facet_grid(. ~ weekend_color) +
+  labs(title = "Average Fare Amount per Hour by Payment Type",
+       x = "Hour", y = "Average Fare Amount", color = "Payment")
+```
+We would like to determine whether different payment methods have an impact on the hourly trend of fare amounts during weekdays and weekends. This plot compares the mean fare amount on weekdays and weekends in November for two payment types (credit card and cash). It's important to note that there are around 50% more trips paid with credit card than with cash. On the plot, we observe a similar trend of mean fares across the hours for both payment types. However, the mean fare consistently remains higher for rides paid with credit cards than for rides paid with cash. There is a peak at 5 am, which is logical given the early morning hour. Hence, the trend of average fare amounts is similar across different payment methods on weekdays and weekends.
+
+
+
+### Is there a relationship between fare amounts and the time of the day, the trip distance, or the trip duration?
+
+Fare amount vs. Time of the Day
+```{r}
+ggplot(taxi, aes(x = fare_amount)) +
+  geom_density() +
+  facet_wrap(. ~ fct_relevel(hour_category, "early morning", "morning", "noon", "afternoon", "evening", "midnight")) +
+  labs(title = "Distribution of NYC Taxi Fare Amounts by Time of Day",
+       x = "Fare Amount ($)",
+       y = "Density") +
+  theme(legend.position = "top")
+```
+We notice that the distributions of fare amounts appear to be similar across different times of the day. In the morning and evening, there are more fares between 10 and 50 dollars compared to any other time of the day. This is probably because morning and evening are the rush hours (going to office / coming back from office) and the fare is less likely to be extreme.
+
+
+Fare Amount vs. Trip Distance
+```{r}
+taxi |> 
+  sample_frac(0.1) |> 
+  ggplot(aes(x=fare_amount, y=trip_distance)) + 
+  geom_point(alpha = 0.3, stroke = 0) + 
+  labs(title = 'Scatter Plot of Fare Amount vs. Trip Distance',
+       x = "Fare Amount ($)",
+       y = "Trip Distance (mile)")
+```
+It seems that there is a linear relationship between fare amount and trip distance, indicating that as the fare amount increases, the trip distance also increases, and vice versa. However, there are some outliers where the fare amount is high despite a small trip distance. Moreover, it seems like there are rounding patterns around 50-dollar-rides.
+
+
+Fare amount vs. Trip Duration
+```{r}
+set.seed(123)
+taxi |> 
+  sample_frac(0.1) |> 
+  ggplot(aes(x=fare_amount, y=trip_duration)) + 
+  geom_point(alpha = 0.3, stroke = 0) + 
+  scale_y_continuous(labels = function(l) {trans = floor(l / 60); paste0(trans, "")}) +
+  labs(title = 'Scatter Plot of Fare Amount vs. Trip Duration',
+       x = "Fare Amount ($)",
+       y = "Trip Duration (hr)")
+```
+Most trips are completed within 1.5 hour (90 minutes) with a fare range of 0 to 100 dollars. However, there are outliers, such as (1) an instance where the fare amount is relatively low (ex. around 5 dollars), but the trip duration is substantially high (ex. exceeds 14 hours), and (2) cases where the fare amount is significantly high, but the trip duration is notably short.
+
+
+## NYC Yellow Taxi Tipping Trend 
+
+### How does the average tip amount vary throughout the day (hourly) and across different weekdays (daily), providing insights into tipping behaviors in NYC?
+
+```{r, message=FALSE, warning = FALSE}
+taxi_heatmap <- taxi %>%
+  group_by(weekday, hour) %>%
+  summarize(mean_tip_percentage = mean(tip_percentage))
+
+ggplot(taxi_heatmap, aes(x = hour, y = fct_rev(fct_relevel(weekday, "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday")), fill = mean_tip_percentage)) +
+  geom_tile() +
+  scale_fill_gradient2(low = "yellow", mid = "orange", high = "red", midpoint = median(taxi_heatmap$mean_tip_percentage)) +
+  labs(title = "Tipping Behaviors Throughout the Week",
+       x = "Hour", y = "Weekday", fill = "Mean Tip Percentage (%)")
+```
+There are differences in tipping behaviors between weekdays and weekends. Passengers appear to tip more during the morning (between 7 am and 9 am) and the evening (after 8 pm) on weekdays (morning and evening are rush hours), as opposed to weekends. Conversely, passengers tend to tip less between 3 am and 5 am (even though we've previously observed that fare amounts are, on average, the highest at 5 am). Moreover, people generally tip less overall on weekends compared to weekdays. The highest tip percentages are observed during peak hours on weekdays.
+
+
+### Do passengers tip more during holidays/weekend?
+
+- Weekdays vs. Weekends
+```{r, message=FALSE, warning = FALSE}
+# Mean tip amount per hour between weekdays and weekends
+taxi %>%
+  group_by(weekend_color, hour) %>%
+  summarize(mean.tip = mean(tip_amount)) %>%
+  ggplot(aes(x = hour, y = mean.tip)) +
+  geom_point(stat = 'identity', aes(color = factor(weekend_color)), size = 3) +
+  geom_line(stat = 'identity', aes(color = factor(weekend_color)), linetype = 'dotted', size = 1) +
+  scale_color_manual(values = c("grey", "lightblue")) + 
+  facet_grid(. ~ weekend_color) +
+  labs(title = "Average Tip Amount per Hour",
+       x = "Hour", y = "Average Tip Amount ($)") +
+  guides(color=guide_legend(title="Type of Day"))
+```
+The average tipping amount appears to be lower overall on weekends. Nevertheless, the average tipping trends during weekdays and weekends are similar, with the highest peak observed in the morning.
+
+- Holidays
+```{r fig.height=8, fig.width=15, message=FALSE, warning = FALSE}
+taxi_tip <- taxi |> 
+  group_by(day, hour) |> 
+  summarize(mean.tip = mean(tip_amount))
+
+ggplot(taxi_tip, aes(x = hour, y = mean.tip)) +
+  geom_point(size = 1) +
+  geom_line(linetype = 'dotted', size = 1) +
+  geom_rect(data = subset(taxi_tip, day %in% c(2, 11, 27)), 
+                          fill = NA, colour = "red", xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf) +
+  geom_rect(data = subset(taxi_tip, day %in% c(1, 28)), 
+                          fill = NA, colour = "green", xmin = -Inf, xmax = Inf, ymin = -Inf, ymax = Inf) +
+  facet_wrap(. ~ day) +
+  labs(title = "Average Tip Amount per Hour during the Day of November",
+       x = "Hour", y = "Average Tip Amount ($)") +
+  guides(color=guide_legend(title="Day of the Month")) +
+  theme(plot.title = element_text(size=20))
+```
+Red-highlighted graphs are the dates of holidays and events in NYC:
+
+* NYC Marathon (November 2, 2014)
+
+* Veterans Day (November 11, 2014)
+
+* NYC Documentary Film Festival (November 13-20, 2014) (**not highlighted**)
+
+* Thanksgiving Day Parade (November 27, 2014)
+
+Overall, identifying the uniqueness of the tipping trend on holidays and event dates compared to other days proves to be challenging. However, we can observe that from the evening on Thanksgiving day (27th) to the following day (28th), the average tip amount is very low. 
+
+In the green-highlighted graph displaying the hourly tipping trend on November 1st, the pattern is notably distinct from other days. People barely tip for their rides on November 1st, despite it being the date with the highest number of taxi rides (as discussed earlier, refer to the plot **Number of NYC Taxi Rides per Day in November**). One possible explanation is that people may have been too tired from celebrating Halloween.
+
+
+### Do pick-up and drop-off locations impact the amount of tips? 
+
+Here is an interactive map showing the **distribution of NYC Yellow Taxi tip percentages**:
+```{r}
+# Add jitter to tip_percentage
+taxi$tip_percentage_jittered <- taxi$tip_percentage + runif(length(taxi$tip_percentage), -0.01, 0.01)
+
+# Use the jittered tip_percentage for coloring
+map <- leaflet(data = taxi %>% sample_frac(0.002)) |> 
+  addTiles() |>  
+  setView(-73.9, 40.75, zoom = 11) |> 
+  addCircles(
+    ~pickup_longitude, ~pickup_latitude, 
+    weight = 1, radius = 10, 
+    color = ~colorQuantile("YlOrRd", na.omit(taxi$tip_percentage_jittered))(tip_percentage_jittered),
+    fillOpacity = 0.8
+  ) |> 
+  addLegend(
+    position = "bottomright",
+    pal = colorQuantile("YlOrRd", na.omit(taxi$tip_percentage_jittered)),
+    values = ~tip_percentage_jittered,
+    opacity = 0.8,
+    title = "Tip Percentage")
+
+map
+```
+
+
+There is no clear pattern of tipping behaviors. Some specific areas, such as LaGuardia airport, tend to concentrate higher tip percentages (between 50% and 100%). However, given our dataset limitations, we cannot confirm or refute the hypothesis that pickup/dropoff locations have an impact on the tipping behaviors. 
+This graph could be improved by segmenting the map into zones. To do that, we can add a new column indicating which zone the point belongs to, using another dataset. We are then able to compute the mean tip percentage over the geographical zone and better visualize the areas with higher or lower tip percentages.
+
+
+
